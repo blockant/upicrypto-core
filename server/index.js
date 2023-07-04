@@ -114,7 +114,7 @@ app.post("/batcherc20-transfer", async (req, res) => {
 
 //End point for batch-transafers
 
-app.post("/batch-transfers", async (req, res) => {
+app.post("/batch-transfer", async (req, res) => {
   console.log(" From batch-transfers");
   try {
     const { t, amt, withPM } = req.body;
