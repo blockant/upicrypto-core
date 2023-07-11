@@ -1,6 +1,7 @@
 const express = require("express");
 const ethers = require("ethers");
 const cors = require("cors");
+const bodyParser = require("body-parser");
 require("dotenv").config();
 
 const {
@@ -14,6 +15,8 @@ const {
 const config = require("../config.json");
 
 const app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.json());
 app.use(cors());
@@ -44,6 +47,7 @@ app.get("/simple-account", async (req, res) => {
 app.post("/batcherc20-transfer", async (req, res) => {
   console.log("From batch erc 20");
   try {
+    console.log(req.body);
     const { tkn, t, amt, withPM } = req.body;
     console.log("Tkn address", tkn);
     console.log("To array", t);
@@ -117,6 +121,7 @@ app.post("/batcherc20-transfer", async (req, res) => {
 app.post("/batch-transfer", async (req, res) => {
   console.log(" From batch-transfers");
   try {
+    console.log("body", req.body);
     const { t, amt, withPM } = req.body;
 
     const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
@@ -181,6 +186,7 @@ app.post("/batch-transfer", async (req, res) => {
 app.post("/erc20-transfer", async (req, res) => {
   console.log("From Erc20 transfers");
   try {
+    console.log(req.body);
     const { tkn, t, amt, withPM } = req.body;
 
     const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
@@ -238,6 +244,7 @@ app.post("/erc20-transfer", async (req, res) => {
 app.post("/transfer", async (req, res) => {
   console.log("From transfer");
   try {
+    console.log(req.body);
     const { t, amt, withPM } = req.body;
 
     const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
@@ -274,7 +281,7 @@ app.post("/transfer", async (req, res) => {
     const txHash = await accountAPI.getUserOpReceipt(uoHash);
     console.log(`Transaction hash: ${txHash}`);
 
-    res.status(200).json({ success: true, txHash });
+    res.status(200).json({ txHash });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "An error occurred while Transfer" });
