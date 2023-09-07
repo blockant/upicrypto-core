@@ -4,6 +4,8 @@ const ethers = require("ethers");
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const factoryAbi = require("./factoryabi.json");
+const mongoose = require("mongoose");
+const Wallet = require("./model/wallet");
 
 const app = express();
 
@@ -18,32 +20,38 @@ const entryPoint = "0x1d965463060CF0baC17C67ec8FF9ace46d6D53d8";
 const salt = 1;
 
 app.post("/deploy-wallet", async (req, res) => {
-  const { accountAddress } = req.body;
-  console.log("account address", accountAddress);
+  const { owner, userEmail } = req.body;
+  console.log("account address", owner);
+  console.log("Email", userEmail);
 
-  const wallet = new ethers.Wallet(
-    process.env.PRIVATE_KEY,
-    provider
-  );
+  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
   console.log("Factory");
 
-  const factory = new ethers.Contract(factoryAddress,factoryAbi,wallet);
+  const factory = new ethers.Contract(factoryAddress, factoryAbi, wallet);
 
-  console.log("factory", factory);
+  // console.log("factory", factory);
 
-  const deployTx = await factory.deployWallet(entryPoint, accountAddress, salt);
+  const deployTx = await factory.deployWallet(entryPoint, owner, salt);
   await deployTx.wait();
 
-  const computedAddress = await factory.computeAddress(
-    entryPoint,
-    accountAddress,
-    salt
-  );
+  const computedAddress = await factory.computeAddress(entryPoint, owner, salt);
 
-  res.json({ walletAddress: computedAddress });
+  const newWallet = new Wallet({
+    userEmail,
+    walletAddress: computedAddress,
+  });
+
+  try {
+    await newWallet.save();
+    res.json({ walletAddress: computedAddress });
+  } catch (error) {
+    console.error("Error saving wallet data:", error);
+    res.status(500).json({ error: "Failed to save wallet data" });
+  }
 });
 
 app.post("/create-checkout-session", async (req, res) => {
+  console.log("Body", req.body);
   const { address, amount } = req.body;
   console.log("Type of amount", amount);
   const session = await stripe.checkout.sessions.create({
@@ -68,6 +76,33 @@ app.post("/create-checkout-session", async (req, res) => {
   res.json({ id: session.id });
 });
 
-app.listen(8000, () => {
-  console.log("Server started at port 8000");
+app.get("/check-wallet/:userEmail", async (req, res) => {
+  try {
+    const userEmail = req.params.userEmail;
+
+    const wallet = await Wallet.findOne({ userEmail });
+
+    if (wallet) {
+      res.json({ hasWallet: true, walletAddress: wallet.walletAddress });
+    } else {
+      res.json({ hasWallet: false });
+    }
+  } catch (error) {
+    console.error("Error checking wallet:", error);
+    res.status(500).json({ error: "Failed to check wallet" });
+  }
 });
+mongoose
+  .connect(process.env.DATABASE_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("connected to Wallet db");
+    app.listen(8000, () => {
+      console.log(" Listning to port no 8000");
+    });
+  })
+  .catch((error) => {
+    console.log(error);
+  });
