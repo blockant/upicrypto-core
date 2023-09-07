@@ -1,0 +1,184 @@
+.form {
+  display: flex;
+  flex-direction: column;
+
+  width: 30%;
+  margin: 0 auto;
+  border-radius: 20px; /* set the border radius to make it rounded */
+  box-shadow: 2px 2px 10px rgba(0, 0, 255, 0.2);
+  padding: 20px 20px 20px 20px; /* add this rule */
+
+  margin-top: 20px;
+  box-sizing: border-box;
+}
+
+.form h2 {
+  text-align: center;
+}
+.form span {
+  display: flex;
+  flex-direction: row;
+}
+
+/* .form span button {
+  margin-top: 10px;
+} */
+
+.label {
+  margin-bottom: 5px;
+  font-family: sans-serif;
+}
+
+.input {
+  flex-grow: 1;
+  margin-bottom: 1px;
+  height: 30px; /* increase the height of the input */
+  border-radius: 5px; /* add rounded corners */
+  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0);
+}
+
+.button {
+  margin-top: 10px;
+  background-color: #0077c2;
+  border-radius: 20px; /* set the border radius to make it rounded */
+  padding: 10px;
+  color: #fff;
+  width: 30%; /* set the width to take up only 30% of the form */
+  margin-left: auto; /* add this rule */
+  margin-right: auto; /* add this rule */
+}
+
+.button:hover {
+  background-color: #00bfff;
+}
+
+.button:focus {
+  background-color: #00bfff;
+}
+.transaction-hash {
+  font-family: monospace;
+  font-size: 14px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+@media (max-width: 900px) {
+  .form {
+    width: auto;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .transaction-hash {
+    font-size: 12px;
+  }
+}
+
+.address-form-input {
+  display: flex;
+  align-items: center;
+}
+
+.address-form-input input {
+  border-radius: 4px;
+  border: none;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px;
+}
+
+.address-form-add-button {
+  margin-left: 8px;
+}
+
+.address-form-address {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.address-form-address button {
+  margin-left: 8px;
+  border-radius: 50%;
+  border: none;
+  background-color: #f2f2f2;
+}
+
+.address-form-address button:hover {
+  background-color: #e6e6e6;
+}
+
+.add-button {
+  margin-top: 5px;
+  background-color: #0077c2;
+  border-radius: 5px; /* set the border radius to make it rounded */
+  padding: 5px;
+  color: #fff;
+  width: 5%; /* set the width to take up only 30% of the form */
+  margin-left: auto; /* add this rule */
+  margin-right: 100%; /* add this rule */
+}
+
+.add-button:hover {
+  background-color: #00bfff;
+}
+
+.add-button:focus {
+  background-color: #00bfff;
+  text-align: center;
+}
+
+.remove-button {
+  margin-top: 5px;
+  background-color: #ff1a1a;
+  border-radius: 5px; /* set the border radius to make it rounded */
+  padding: 2px;
+  color: #fff;
+
+  width: 3%;
+  height: 2%; /* set the width to take up only 30% of the form */
+  margin-left: 10px; /* add this rule */
+  margin-right: auto; /* add this rule */
+}
+
+.remove-button:hover {
+  background-color: #b30000;
+}
+
+.remove-button:focus {
+  background-color: #b30000;
+}
+
+.to {
+  /* border:1px solid  */
+  margin-bottom: 1px;
+  height: 30px; /* increase the height of the input */
+  border-radius: 5px; /* add rounded corners */
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+
+  /* box-shadow: 2px 2px 10px rgba(0, 0, 255, 0.2); */
+  /* border-radius: 3px;
+  padding: 5px 5px 5px 5px;
+  width: 60%; */
+}
+.error {
+  border-color: #e60000;
+  color: #e60000;
+}
+
+.login-button {
+  background-color: #0077c2;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  padding: 10px 20px;
+  font-size: 20px;
+  cursor: pointer;
+  margin: 80px 0px 10px 20px;
+  height: 50px;
+}
+
+.login-button:hover {
+  background-color: #00bfff;
+}
+
+.login-button:focus {
+  background-color: #00bfff;
+}

@@ -1,0 +1,57 @@
+/* styles.css */
+
+.wallet-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.balance-section {
+  margin-bottom: 20px;
+}
+.transaction-hash {
+  font-family: monospace;
+  font-size: 14px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+h3 {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px; /* Increased padding for better button appearance */
+  cursor: pointer;
+  margin-top: 10px; /* Add some space above the button */
+}
+
+.form-button button:hover {
+  background-color: #0056b3;
+}
+
+.form {
+  display: flex;
+  flex-direction: column; /* Change to column layout for better form elements arrangement */
+  margin-top: 20px; /* Increase the top margin for more space */
+}
+
+.form input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  margin-bottom: 10px; /* Add space between input elements */
+  font-size: 16px; /* Set a nice font size for inputs */
+}
