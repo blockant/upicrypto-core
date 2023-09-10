@@ -1,10 +1,12 @@
 import { useState } from "react";
 import "./CreateWallet.css";
+import LoadingSpinner from "./LoadingSpinner";
 
 export default function CreateWallet(props) {
   const [invalidOwner, setInvalidOwner] = useState(false);
 
   const [walletAddress, setWalletAddressHere] = useState("0x");
+  const [loading, setLoading] = useState(false);
 
   const [formValues, setFormValues] = useState({
     amt: "",
@@ -25,6 +27,7 @@ export default function CreateWallet(props) {
   }
 
   const handleSubmit = async (event) => {
+    setLoading(true);
     event.preventDefault();
 
     const invalidOwner = checkInvalidToAddress(formValues.owner);
@@ -40,12 +43,13 @@ export default function CreateWallet(props) {
         },
         body: JSON.stringify({
           ...formValues,
-          userEmail: "gurjarritesh@155gmial.com",
+          userEmail: props.email,
         }),
       });
       const data = await response.json();
       setWalletAddressHere(data.walletAddress);
       props.setWalletAddress(data.walletAddress);
+      setLoading(false);
     } catch (error) {
       console.log("Error While Fetching Data ", error);
     }
@@ -88,9 +92,13 @@ export default function CreateWallet(props) {
         />
         <br />
 
-        <button className="button" type="submit">
-          Create Wallet
-        </button>
+        {loading ? (
+          <LoadingSpinner />
+        ) : (
+          <button className="button" type="submit">
+            Create Wallet
+          </button>
+        )}
         {walletAddress && (
           <>
             <br />

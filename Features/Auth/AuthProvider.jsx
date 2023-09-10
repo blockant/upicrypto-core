@@ -20,6 +20,7 @@ const WEB3AUTH_CLIENT_ID =
   "BPXquy7pVKpvSW4MX1AIiot1Lj25U6pWmso7xXD9v4BDqxTTi17_GbLKRM1xnYbVxdBULlnsfY6hH9LI-5qqI7Y"; // get your clientId from https://developer.web3auth.io
 
 const solanaChainConfig = {
+  web3AuthNetwork: "testnet",
   chainNamespace: "eip155",
   rpcTarget: "https://rpc.ankr.com/polygon_mumbai",
   blockExplorer: "https://mumbai.polygonscan.com/",
