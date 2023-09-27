@@ -93,6 +93,54 @@ app.post("/create-checkout-session", async (req, res) => {
   res.json({ id: session.id });
 });
 
+app.post("/payment", async (req, res) => {
+  const { amount, address, token } = req.body;
+  console.log("AMount ", amount);
+  console.log("token ", token);
+
+  try {
+    // Find the wallet with the same userEmail
+    const wallet = await Wallet.findOne({ walletAddress: address });
+
+    if (!wallet) {
+      res.status(400).json({ error: "No wallet found for this user." });
+      return;
+    }
+
+    // Check if the wallet already has a customerId
+    if (!wallet.customerId) {
+      // If the wallet does not have a customerId, create a customer in Stripe
+      const stripeCustomer = await stripe.customers.create({
+        email: token.email,
+        source: token.id,
+      });
+
+      // Update the wallet's customerId field
+      wallet.customerId = stripeCustomer.id;
+      await wallet.save();
+    }
+
+    // Create a charge using the customerId
+    const charge = await stripe.charges.create(
+      {
+        amount: amount * 100,
+        currency: "inr",
+        customer: wallet.customerId,
+        receipt_email: token.email,
+        description: `Adding Funds`,
+      }
+      // { idempontencyKey: uuid() }
+    );
+
+    res.status(200).json(charge);
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "An error occurred while processing your payment." });
+  }
+});
+
 app.get("/get-wallet-balance/:walletAddress", async (req, res) => {
   try {
     const address = req.params.walletAddress;
@@ -114,6 +162,56 @@ app.get("/get-wallet-balance/:walletAddress", async (req, res) => {
   }
 });
 
+app.get("/get-wallet-balance-new/:walletAddress", async (req, res) => {
+  try {
+    const address = req.params.walletAddress;
+    console.log("Address fron balance ", address);
+
+    const wallet = await Wallet.findOne({ walletAddress: address });
+
+    if (!wallet) {
+      return res.status(404).json({ error: "Wallet not found" });
+    }
+
+    const customer_id = wallet.customerId;
+    console.log("Customer Id", customer_id);
+    const customer = await stripe.customers.retrieve(customer_id);
+
+    const balance = customer.balance;
+    console.log("Balance from new", balance);
+
+    res.json({ balance });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+app.get("/get-charges-new/:walletAddress", async (req, res) => {
+  try {
+    const address = req.params.walletAddress;
+    console.log("Address fron balance ", address);
+
+    const wallet = await Wallet.findOne({ walletAddress: address });
+
+    if (!wallet) {
+      return res.status(404).json({ error: "Wallet not found" });
+    }
+
+    const customer_id = wallet.customerId;
+    const charges = await stripe.charges.list({
+      limit: 3,
+      customer: customer_id,
+    });
+
+    const allCharges = charges.data;
+    console.log("Balance", allCharges);
+
+    res.json({ allCharges });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 app.post("/get-charges", async (req, res) => {
   const { address } = req.body;
   try {
