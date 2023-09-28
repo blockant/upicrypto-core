@@ -131,6 +131,8 @@ app.post("/payment", async (req, res) => {
       }
       // { idempontencyKey: uuid() }
     );
+    wallet.balance += +amount;
+    await wallet.save();
 
     res.status(200).json(charge);
   } catch (err) {
