@@ -8,6 +8,7 @@ const entryPointAbi = require("./entrypointabi.json");
 const smartWalletAbi = require("./smartwalletabi.json");
 const mongoose = require("mongoose");
 const Wallet = require("./model/wallet");
+const Networks = require("./model/networks");
 const { isAddress } = require("ethers/lib/utils");
 
 const app = express();
@@ -27,7 +28,7 @@ app.post("/deploy-wallet", async (req, res) => {
   const { owner, userEmail } = req.body;
   console.log("account address", owner);
   console.log("Email", userEmail);
-
+  console.log("Private key from deploy", process.env.PRIVATE_KEY);
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
   console.log("Factory");
 
@@ -40,9 +41,25 @@ app.post("/deploy-wallet", async (req, res) => {
 
   const computedAddress = await factory.computeAddress(entryPoint, owner, salt);
 
+  const defaultNetworkName = "Ethereum Mainnet";
+  let defaultNetwork = await Networks.findOne({ name: defaultNetworkName });
+
+  if (!defaultNetwork) {
+    defaultNetwork = new Networks({
+      networkName: "Polygon",
+      chainId: "80001",
+      rpcUrl: "https://mainnet.infura.io/v3/YOUR_INFURA_API_KEY",
+      currencySymbol: "MATIC",
+      blockExplorerUrl: "https://mainnet.infura.io/v3/YOUR_INFURA_API_KEY",
+    });
+
+    await defaultNetwork.save();
+  }
+
   const newWallet = new Wallet({
     userEmail,
     walletAddress: computedAddress,
+    networks: [defaultNetwork._id],
   });
 
   try {
@@ -200,15 +217,22 @@ app.get("/get-charges-new/:walletAddress", async (req, res) => {
     }
 
     const customer_id = wallet.customerId;
-    const charges = await stripe.charges.list({
-      limit: 3,
-      customer: customer_id,
-    });
+    console.log("customer", customer_id);
+    if (customer_id) {
+      const charges = await stripe.charges.list({
+        limit: 3,
+        customer: customer_id,
+      });
 
-    const allCharges = charges.data;
-    console.log("Balance", allCharges);
+      const allCharges = charges.data;
+      console.log("Balance", allCharges);
 
-    res.json({ allCharges });
+      res.json({ allCharges });
+    } else {
+      {
+        [];
+      }
+    }
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -253,16 +277,20 @@ app.post("/execute-transaction", async (req, res) => {
     const provider = new ethers.providers.JsonRpcProvider(
       "https://polygon-mumbai.g.alchemy.com/v2/KFGiZ9X78dt4jBe16IjpjVXbhlPzuSx8"
     );
-    const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+    console.log("Private key value ", process.env.PRIVATE_KEY);
+    const wallet = new ethers.Wallet(
+      "015ee5a3de874d65f9dc047010a21a8139fe6958bcd934c0ddd9f318f044f8b1",
+      provider
+    );
     console.log("Walllet", wallet);
 
     const benificiaryAddress = "0x1781dD58E10698Ce327d493771F7Ba9E5B394BF2";
     const EntryPoint_Addr = "0x1781dD58E10698Ce327d493771F7Ba9E5B394BF2";
-    const callGasLimit = "1000000";
+    const callGasLimit = "100000";
     const verificationGasLimit = "200000";
-    const preVerificationGas = "5000000";
-    const maxFeePerGas = "10000000000";
-    const maxPriorityFeePerGas = "10000000000";
+    const preVerificationGas = "50";
+    const maxFeePerGas = "10";
+    const maxPriorityFeePerGas = "10";
 
     const smartAccount = new ethers.utils.Interface(smartWalletAbi);
     const amount = ethers.utils.parseEther(amountEth.toString());
@@ -350,6 +378,66 @@ app.post("/execute-transaction", async (req, res) => {
   } catch (error) {
     console.error("Error:", error);
     return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/add-network", async (req, res) => {
+  console.log("Inside Add Netowork");
+  const {
+    userEmail,
+    networkName,
+    chainId,
+    rpcUrl,
+    blockExplorerUrl,
+    currencySymbol,
+  } = req.body;
+  console.log("network name ", networkName);
+
+  const userWallet = await Wallet.findOne({ userEmail });
+
+  console.log("USer Wallet", userWallet);
+
+  if (!userWallet) {
+    return res.status(404).json({ error: "User wallet not found" });
+  }
+
+  const newNetwork = new Networks({
+    networkName: networkName,
+    chainId: chainId,
+    rpcUrl: rpcUrl,
+    blockExplorerUrl: blockExplorerUrl,
+    currencySymbol: currencySymbol,
+  });
+  try {
+    await newNetwork.save();
+    userWallet.networks.push(newNetwork._id);
+
+    await userWallet.save();
+    res.json({ success: "Network added succesfully" });
+  } catch (error) {
+    console.error("Error saving wallet data:", error);
+    res.status(500).json({ error: "Failed to save wallet data" });
+  }
+});
+
+app.get("/netowrks/:walletAddress", async (req, res) => {
+  const { walletAddress } = req.params;
+
+  try {
+    const userWallet = await Wallet.findOne({ walletAddress }).populate(
+      "networks"
+    );
+
+    if (!userWallet) {
+      return res.status(404).json({ error: "Wallet not found" });
+    }
+
+    const networks = userWallet.networks;
+
+    res.json({ networks });
+  } catch (error) {
+    console.error("Error fetching networks:", error);
+    res.status(500).json({ error: "Failed to fetch networks" });
   }
 });
 
