@@ -278,10 +278,7 @@ app.post("/execute-transaction", async (req, res) => {
       "https://polygon-mumbai.g.alchemy.com/v2/KFGiZ9X78dt4jBe16IjpjVXbhlPzuSx8"
     );
     console.log("Private key value ", process.env.PRIVATE_KEY);
-    const wallet = new ethers.Wallet(
-      "015ee5a3de874d65f9dc047010a21a8139fe6958bcd934c0ddd9f318f044f8b1",
-      provider
-    );
+    const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
     console.log("Walllet", wallet);
 
     const benificiaryAddress = "0x1781dD58E10698Ce327d493771F7Ba9E5B394BF2";
