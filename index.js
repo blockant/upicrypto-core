@@ -417,19 +417,25 @@ app.post("/add-network", async (req, res) => {
   }
 });
 
-app.get("/netowrks/:walletAddress", async (req, res) => {
+app.get("/networks/:walletAddress", async (req, res) => {
   const { walletAddress } = req.params;
+
+  // console.log("wallet address from fetch", walletAddress);
 
   try {
     const userWallet = await Wallet.findOne({ walletAddress }).populate(
       "networks"
     );
 
+    console.log("User wallet from get networks");
+
     if (!userWallet) {
       return res.status(404).json({ error: "Wallet not found" });
     }
 
     const networks = userWallet.networks;
+
+    // console.log("Sending netpwrks are", networks);
 
     res.json({ networks });
   } catch (error) {
