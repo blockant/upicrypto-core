@@ -28,6 +28,8 @@ Make sure you have the following installed:
 
 ## Deploying a Wallet
 
+The `/deploy-wallet` endpoint of the Smart Wallet API allows users to deploy a new Smart wallet on any EVM network. This is a crucial step for users who want to interact with decentralized applications or execute transactions through smart contract Wallets(Account Abstraction).
+
 ### Endpoint
 
 `POST /deploy-wallet`
@@ -53,8 +55,6 @@ Make sure you have the following installed:
 ## Examples
 
 ### Deploying a Wallet
-
-The `/deploy-wallet` endpoint of the Smart Wallet API allows users to deploy a new Smart wallet on any EVM network. This is a crucial step for users who want to interact with decentralized applications or execute transactions through smart contract Wallets(Account Abstraction).
 
 #### cmd
 
