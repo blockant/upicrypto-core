@@ -62,7 +62,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"owner": "0x123abc", "user
 
 #### Nodejs
 
-```nodejs
+```bash
 const axios = require('axios');
 
 const data = {
@@ -123,27 +123,27 @@ curl -X POST -H "Content-Type: application/json" -d '{"recipientAddress": "0x456
 
 #### Nodejs
 
-```nodejs
-const axios = require('axios');
+```javascript
+const axios = require("axios");
 
 const data = {
-  recipientAddress: '0x456def',
-  amountEth: '0.1',
-  sender: '0x123abc',
+  recipientAddress: "0x456def",
+  amountEth: "0.1",
+  sender: "0x123abc",
 };
 
-axios.post('http://UpicryptoApi:3000/execute-transaction', data, {
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-  .then(response => {
-    console.log('Response:', response.data);
+axios
+  .post("http://UpicryptoApi:3000/execute-transaction", data, {
+    headers: {
+      "Content-Type": "application/json",
+    },
   })
-  .catch(error => {
-    console.error('Error:', error.message);
+  .then((response) => {
+    console.log("Response:", response.data);
+  })
+  .catch((error) => {
+    console.error("Error:", error.message);
   });
-
 ```
 
 ## Get Wallet Balance
@@ -209,20 +209,19 @@ curl http://localhost:3000/get-wallet-balance/0x456def
 
 #### Nodejs
 
-```nodejs
-const axios = require('axios');
+```javascript
+const axios = require("axios");
 
-const walletAddress = '0x456def';
+const walletAddress = "0x456def";
 
-axios.get(`http://localhost:3000/get-wallet-balance/${walletAddress}`)
-  .then(response => {
-    console.log('Balance:', response.data.balance);
+axios
+  .get(`http://localhost:3000/get-wallet-balance/${walletAddress}`)
+  .then((response) => {
+    console.log("Balance:", response.data.balance);
   })
-  .catch(error => {
-    console.error('Error:', error.message);
+  .catch((error) => {
+    console.error("Error:", error.message);
   });
-
-
 ```
 
 ## Process Payment
@@ -284,28 +283,29 @@ curl -X POST -H "Content-Type: application/json" -d '{"amount": 50, "address": "
 
 #### Nodejs
 
-```nodejs
-const axios = require('axios');
+```javascript
+const axios = require("axios");
 
 const paymentData = {
   amount: 50,
-  address: '0x456def',
+  address: "0x456def",
   token: {
-    id: 'stripe_token_id',
-    email: 'user@example.com',
+    id: "stripe_token_id",
+    email: "user@example.com",
   },
 };
 
-axios.post('http://UpicryptoApi:3000/payment', paymentData, {
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-  .then(response => {
-    console.log('Payment Details:', response.data);
+axios
+  .post("http://UpicryptoApi:3000/payment", paymentData, {
+    headers: {
+      "Content-Type": "application/json",
+    },
   })
-  .catch(error => {
-    console.error('Error:', error.message);
+  .then((response) => {
+    console.log("Payment Details:", response.data);
+  })
+  .catch((error) => {
+    console.error("Error:", error.message);
   });
 ```
 
@@ -364,30 +364,30 @@ curl -X POST -H "Content-Type: application/json" -d '{"userEmail": "user@example
 
 #### Nodejs
 
-```nodejs
-const axios = require('axios');
+```javascript
+const axios = require("axios");
 
 const networkData = {
-  userEmail: 'user@example.com',
-  networkName: 'Custom Network',
-  chainId: '12345',
-  rpcUrl: 'https://custom-rpc-url.com',
-  blockExplorerUrl: 'https://custom-explorer-url.com',
-  currencySymbol: 'CUS',
+  userEmail: "user@example.com",
+  networkName: "Custom Network",
+  chainId: "12345",
+  rpcUrl: "https://custom-rpc-url.com",
+  blockExplorerUrl: "https://custom-explorer-url.com",
+  currencySymbol: "CUS",
 };
 
-axios.post('http://UpicryptoApi:3000/add-network', networkData, {
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-  .then(response => {
-    console.log('Response:', response.data);
+axios
+  .post("http://UpicryptoApi:3000/add-network", networkData, {
+    headers: {
+      "Content-Type": "application/json",
+    },
   })
-  .catch(error => {
-    console.error('Error:', error.message);
+  .then((response) => {
+    console.log("Response:", response.data);
+  })
+  .catch((error) => {
+    console.error("Error:", error.message);
   });
-
 ```
 
 ## Get Networks
@@ -447,25 +447,24 @@ If there's an internal server error, the API will respond with a 500 error:
 #### cmd
 
 ```bash
+
 curl http://UpicryptoApi:3000/networks/{walletAddress}
-
-
 
 ```
 
 #### Nodejs
 
-```nodejs
-const axios = require('axios');
+```javascript
+const axios = require("axios");
 
-const walletAddress = '0x456def';
+const walletAddress = "0x456def";
 
-axios.get(`http://UpicryptoApi:3000/networks/${walletAddress}`)
-  .then(response => {
-    console.log('Networks:', response.data.networks);
+axios
+  .get(`http://UpicryptoApi:3000/networks/${walletAddress}`)
+  .then((response) => {
+    console.log("Networks:", response.data.networks);
   })
-  .catch(error => {
-    console.error('Error:', error.message);
+  .catch((error) => {
+    console.error("Error:", error.message);
   });
-
 ```
