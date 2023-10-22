@@ -16,11 +16,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 const provider = new ethers.providers.JsonRpcProvider(
-  "https://polygon-mumbai.g.alchemy.com/v2/KFGiZ9X78dt4jBe16IjpjVXbhlPzuSx8"
+  "https://polygonzkevm-testnet.g.alchemy.com/v2/nYeaX4kyXgRrg2BDIwAi1w7fMvH8Spq8" //"https://polygon-mumbai.g.alchemy.com/v2/KFGiZ9X78dt4jBe16IjpjVXbhlPzuSx8"
 );
 
-const factoryAddress = "0xbc7cb1188006553fCA5E2aeB76974CfF66Dd9791";
-const entryPoint = "0x1781dD58E10698Ce327d493771F7Ba9E5B394BF2";
+const factoryAddress = "0xB4096D858c846fc1C5Ae6f9126235C1935ae2D03"; //"0xbc7cb1188006553fCA5E2aeB76974CfF66Dd9791";
+const entryPoint = "0xCD4fF2FEcFD23C7693157395160dE6eA30609C39"; //"0x1781dD58E10698Ce327d493771F7Ba9E5B394BF2";
 const salt = 1;
 
 app.post("/deploy-wallet", async (req, res) => {
@@ -36,7 +36,9 @@ app.post("/deploy-wallet", async (req, res) => {
 
   // console.log("factory", factory);
 
-  const deployTx = await factory.deployWallet(entryPoint, owner, salt);
+  const deployTx = await factory.deployWallet(entryPoint, owner, salt, {
+    gasLimit: 150000,
+  });
   await deployTx.wait();
 
   const computedAddress = await factory.computeAddress(entryPoint, owner, salt);
@@ -252,6 +254,7 @@ app.post("/get-charges", async (req, res) => {
 });
 
 app.get("/check-wallet/:userEmail", async (req, res) => {
+  console.log("Inside check wallet", req.params.userEmail);
   try {
     const userEmail = req.params.userEmail;
 
@@ -271,6 +274,116 @@ app.get("/check-wallet/:userEmail", async (req, res) => {
 app.post("/execute-transaction", async (req, res) => {
   try {
     const { recipientAddress, amountEth, sender } = req.body;
+    console.log("Receipent address", recipientAddress);
+    console.log("amount", amountEth);
+    console.log("Sender", sender);
+    const provider = new ethers.providers.JsonRpcProvider(
+      "https://polygonzkevm-testnet.g.alchemy.com/v2/nYeaX4kyXgRrg2BDIwAi1w7fMvH8Spq8" //"https://polygon-mumbai.g.alchemy.com/v2/KFGiZ9X78dt4jBe16IjpjVXbhlPzuSx8"
+    );
+    console.log("Private key value ", process.env.PRIVATE_KEY);
+    const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+    console.log("Walllet", wallet);
+
+    const benificiaryAddress = "0xCD4fF2FEcFD23C7693157395160dE6eA30609C39"; //"0x1781dD58E10698Ce327d493771F7Ba9E5B394BF2";
+    const EntryPoint_Addr = "0xCD4fF2FEcFD23C7693157395160dE6eA30609C39"; //"0x1781dD58E10698Ce327d493771F7Ba9E5B394BF2";
+    const callGasLimit = "100000";
+    const verificationGasLimit = "200000";
+    const preVerificationGas = "50";
+    const maxFeePerGas = "10";
+    const maxPriorityFeePerGas = "10";
+
+    const smartAccount = new ethers.utils.Interface(smartWalletAbi);
+    const amount = ethers.utils.parseEther(amountEth.toString());
+
+    const calldata = smartAccount.encodeFunctionData("executeFromEntryPoint", [
+      recipientAddress,
+      amount,
+      "0x",
+    ]);
+
+    const smartwallet = new ethers.Contract(sender, smartWalletAbi, wallet);
+
+    const nonce = await smartwallet.nonce();
+    const owner = await smartwallet.owner();
+    console.log("Owner", owner);
+
+    const EntryPoint = new ethers.Contract(
+      EntryPoint_Addr,
+      entryPointAbi,
+      provider
+    );
+
+    let userOpHash;
+    try {
+      userOpHash = await EntryPoint.getUserOpHash({
+        sender: sender,
+        nonce: nonce,
+        initCode: "0x",
+        callData: calldata,
+        callGasLimit: callGasLimit,
+        verificationGasLimit: verificationGasLimit,
+        preVerificationGas: preVerificationGas,
+        maxFeePerGas: maxFeePerGas,
+        maxPriorityFeePerGas: maxPriorityFeePerGas,
+        paymasterAndData: "0x",
+        signature: "0x",
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      return res.status(500).json({ error: "Error generating userOpHash" });
+    }
+    console.log("UserOpHash", userOpHash);
+
+    const arraifiedHash = ethers.utils.arrayify(userOpHash);
+
+    // const provider = new ethers.providers.JsonRpcProvider(
+    //   "https://polygon-mumbai.g.alchemy.com/v2/KFGiZ9X78dt4jBe16IjpjVXbhlPzuSx8"
+    // );
+    // const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+
+    const signature = await wallet.signMessage(arraifiedHash);
+    const { r, s, v } = ethers.utils.splitSignature(signature);
+
+    const userOperations = [
+      {
+        sender: sender,
+        nonce: nonce,
+        initCode: "0x",
+        callData: calldata,
+        callGasLimit: callGasLimit,
+        verificationGasLimit: verificationGasLimit,
+        preVerificationGas: preVerificationGas,
+        maxFeePerGas: maxFeePerGas,
+        maxPriorityFeePerGas: maxPriorityFeePerGas,
+        paymasterAndData: "0x",
+        signature: signature,
+      },
+    ];
+
+    try {
+      const tx = await EntryPoint.connect(wallet).handleOps(
+        userOperations,
+        benificiaryAddress,
+        { gasLimit: 15000000 }
+      );
+      await tx.wait();
+      return res.status(200).json({
+        message: "Transaction executed successfully",
+        txHash: tx.hash,
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      return res.status(500).json({ error: "Error executing transaction" });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/execute-erc20transaction", async (req, res) => {
+  try {
+    const { recipientAddress, amountEth, sender, erc20TokenAddress } = req.body;
     console.log("Receipent address", recipientAddress);
     console.log("amount", amountEth);
     console.log("Sender", sender);
